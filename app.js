@@ -53,11 +53,19 @@ function reorder(){
     newSelection()
 }
 
+// Helper: get order triplet from verse ID (e.g., "verse-012" => [0, 1, 2])
+function parseId(id) {
+    return id.replace("verse-", "").split('').map(Number);
+}
+
 function addHoverListeners() {
+  let firstSelected = null;
   // Select all generated verses
   const verses = document.querySelectorAll('.generatedVerse');
+  // Hover listeners for original verses
+  const originalVerses = document.querySelectorAll('.originalPoem span[id^="verse-"]');
 
-  verses.forEach(verse => {
+  verses.forEach((verse, index) => {
     verse.addEventListener('mouseenter', () => {
         verse.classList.add('highlighted')
         const id = verse.dataset.verse;
@@ -69,7 +77,92 @@ function addHoverListeners() {
         verse.classList.remove('highlighted')
         const id = verse.dataset.verse;
         const originalLine = document.getElementById(id);
-        if (originalLine) originalLine.classList.remove('highlighted');
+        if (originalLine) originalLine.classList.remove ('highlighted');
+    });
+    // Click to select and swap
+    verse.addEventListener('click', () => {
+    if (!firstSelected) {
+        firstSelected = { element: verse, index };
+        verse.classList.add('selected');
+      } else if (firstSelected.element.classList.contains('originalVerse')) {
+        const origId = firstSelected.element.id;
+        const parsed = parseId(origId);
+
+        const previousId = verse.dataset.verse;
+
+        verse.textContent = firstSelected.element.textContent;
+        verse.dataset.verse = origId;
+
+        order[index] = parsed;
+
+        document.querySelectorAll('.originalVerse').forEach(el => {
+            el.classList.remove('copiedFrom', 'overwritten');
+        });
+
+        const countOfNew = [...document.querySelectorAll('.generatedVerse')]
+            .filter(el => el.dataset.verse === origId).length;
+
+        if (countOfNew > 1) {
+            firstSelected.element.classList.add('copiedFrom'); // green if duplicated
+        }
+
+        const countOfOld = [...document.querySelectorAll('.generatedVerse')]
+            .filter(el => el.dataset.verse === previousId).length;
+
+        const oldOrig = document.getElementById(previousId);
+        if (countOfOld === 0 && oldOrig) {
+            oldOrig.classList.add('overwritten'); // red if no longer used
+        }
+
+        firstSelected.element.classList.remove('selected');
+        firstSelected = null;
+      } else if (firstSelected.element === verse) {
+        // Deselect
+        verse.classList.remove('selected');
+        firstSelected = null;
+      } else {
+        // Swap two generated verses
+        const tempText = firstSelected.element.textContent;
+        const tempData = firstSelected.element.dataset.verse;
+
+        firstSelected.element.textContent = verse.textContent;
+        firstSelected.element.dataset.verse = verse.dataset.verse;
+
+        verse.textContent = tempText;
+        verse.dataset.verse = tempData;
+
+        // Swap in order array
+        const tempOrder = order[firstSelected.index];
+        order[firstSelected.index] = order[index];
+        order[index] = tempOrder;
+
+        firstSelected.element.classList.remove('selected');
+        firstSelected = null;
+      }
+  });
+  });
+  
+  originalVerses.forEach(orig => {
+    orig.addEventListener('mouseenter', () => {
+      orig.classList.add('highlighted');
+      const id = orig.id;
+      const generated = document.querySelector(`.generatedVerse[data-verse="${id}"]`);
+      if (generated) generated.classList.add('highlighted');
+    });
+
+    orig.addEventListener('mouseleave', () => {
+      orig.classList.remove('highlighted');
+      const id = orig.id;
+      const generated = document.querySelector(`.generatedVerse[data-verse="${id}"]`);
+      if (generated) generated.classList.remove('highlighted');
+    });
+    
+    orig.addEventListener('click', () => {
+      if (firstSelected && firstSelected.element.classList.contains('originalVerse')) {
+        firstSelected.element.classList.remove('selected');
+      }
+      firstSelected = { element: orig }; // no index needed when from original
+      orig.classList.add('selected');
     });
   });
 }
