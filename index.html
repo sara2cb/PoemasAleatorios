@@ -1,175 +1,48 @@
 <!DOCTYPE html>
 <html style="overflow: hidden">
-  <head>
-    <meta charset="utf-8"/>
-    <title>Poemas</title>
-
-    
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link rel="stylesheet" type="text/css" href="webgl.css">
-  </head>
-  <body onload="initDemo()">
-    <div class="splitLeft left" id="left" >
-    </div>
-
-    <div class="splitRight right">
-		<div class="centered">
-            <div class="btn-group">
-                <button class="button" type="button" onclick="randomize()">Aleatorizar</button>
-
-                <p >Propuesta:</p>
-                <select name="mode" id="mode" onchange="newSelection()">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Poemas</title>
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="webgl.css">
+    </head>
+    <body onload="initDemo()">
+        <div class="container">
+            <!-- Left Panel: Selector and Options -->
+            <div class="leftPanel">
+                <button onclick="randomize()">Aleatorizar</button>
+                <button onclick="reorder()">Reordenar</button>
+                <label for="mode">Propuesta:</label>
+                <select id="mode" onchange="newSelection()">
                     <option disabled selected value> -- Escoge -- </option>
-                    <option value="1" >1ª Propuesta</option>
-                    <option value="2" >2ª Propuesta</option>
-                    <option value="3" >3ª Propuesta</option>
-                    <option value="4" >4ª Propuesta</option>
-                    <option value="5" >5ª Propuesta</option>
+                    <option value="1">Verso</option>
+                    <option value="2">Estrofa</option>
+                    <option value="3">Prosa</option>
+                    <option value="4">Cortina</option>
                 </select>
 
-                <table id="tableColRow" style="display: none;">
-                    <tr>
-                    <th> <p for="row" style="margin-bottom:0;">Fila Poemas</p></th>
-                    <th> <p for="column" style="margin-bottom:0;">Columnas</p></th>
-                    </tr>
-                    <tr>
-                    <td><input type="number" id="rowVal" name="rowVal" value="3" step="1"  min="1" max="6" onchange="rowChange()"></td>
-                    <td><input type="number" id="columnVal" name="columnVal" value="2" step="1" min="1" max="6" onchange="columnChange()"></td>
-                    </tr>
-                </table>
 
-                <table id="orderP1P2" style="display: none;">
-                    <tr>
-                        <td><p>1.</p><input type="text" id="p1poem1" name="poem1" value="A1" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td><p>2.</p><input type="text" id="p1poem2" name="poem1" value="B1" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td><p>3.</p><input type="text" id="p1poem3" name="poem1" value="A2" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td><p>4.</p><input type="text" id="p1poem4" name="poem1" value="B2" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td><p>5.</p><input type="text" id="p1poem5" name="poem1" value="A3" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td><p>6.</p><input type="text" id="p1poem6" name="poem1" value="B3" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                </table>
+                <!-- Right Panel: Original Poem -->
+                <div class="originalPoem">
+                    <span id="verse-000" class="italic">toda roca</span>        <span id="verse-001" > nace de lo que es</span><br />
+                    <span id="verse-010" class="italic">muere</span>            <span id="verse-011" > nace la piedra</span><br />
+                    <span id="verse-020" class="italic">nace</span>             <span id="verse-021" > y muere de lo que es</span><br /><br />
 
-                <table id="orderP3" style="display: none;">
-                    <tr>
-                        <td style="text-align: right;"><p>1. A</p></td>
-                        <td><input type="number" id="p3poem11" name="p3poem11" value="1" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="number" id="p3poem21" name="p3poem21" value="1" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>2. A</p></td>
-                        <td><input type="number" id="p3poem12" name="p3poem12" value="2" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="number" id="p3poem22" name="p3poem22" value="2" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>3. A</p></td>
-                        <td><input type="number" id="p3poem13" name="p3poem13" value="3" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="number" id="p3poem23" name="p3poem23" value="3" onchange="newSelection()" min="1" max="3" step="1" size="6"></td>
-                    </tr>
-                </table>
+                    <span id="verse-100" class="italic">roca</span>             <span id="verse-101" > piedra</span><br />
+                    <span id="verse-110" class="italic">lo que somos </span>    <span id="verse-111" > sobre nuestra piel</span><br />
+                    <span id="verse-120" class="italic">lo que resistimos</span><span id="verse-121" > bajo ella</span><br /><br />
 
-                <table id="orderP4" style="display: none;">
-                    <tr>
-                        <td style="text-align: right;"><p>1. A</p></td>
-                        <td><input type="text" id="p4poem111" name="p4poem111" value="11" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem211" name="p4poem211" value="11" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem112" name="p4poem112" value="12" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem212" name="p4poem212" value="12" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem113" name="p4poem113" value="13" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem213" name="p4poem213" value="13" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
+                    <span id="verse-200" class="italic">piedra </span>          <span id="verse-201" > dijo el pedrero piedra</span><br />
+                    <span id="verse-210" class="italic">del muro</span>         <span id="verse-211" > miró la maldición de la labor</span><br />
+                    <span id="verse-220" class="italic">y de la piedra</span>   <span id="verse-221" > y continuó el trabajo</span>
+                </div>
+            </div>
 
-                    <tr>
-                        <td style="text-align: right;"><p>2. A</p></td>
-                        <td><input type="text" id="p4poem121" name="p4poem121" value="21" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem221" name="p4poem221" value="21" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem122" name="p4poem122" value="22" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem222" name="p4poem222" value="22" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem123" name="p4poem123" value="23" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem223" name="p4poem223" value="23" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-
-                    <tr>
-                        <td style="text-align: right;"><p>3.A</p></td>
-                        <td><input type="text" id="p4poem131" name="p4poem131" value="31" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem231" name="p4poem231" value="31" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem132" name="p4poem132" value="32" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>-B</p></td>
-                        <td><input type="text" id="p4poem232" name="p4poem232" value="32" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: right;"><p>  A</p></td>
-                        <td><input type="text" id="p4poem133" name="p4poem133" value="33" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                        <td style="text-align: center;"><p>- B</p></td>
-                        <td><input type="text" id="p4poem233" name="p4poem233" value="33" onchange="newSelection()" required minlength="2" maxlength="2" size="6"></td>
-                    </tr>
-                </table>
-
-                <table id="orderP5" style="display: none;">
-                    <tr>
-                        <td><p>1.</p><input type="text" id="p5poem1" name="poem5" value="A11" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>2.</p><input type="text" id="p5poem2" name="poem5" value="A12" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>3.</p><input type="text" id="p5poem3" name="poem5" value="A13" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td><p>4.</p><input type="text" id="p5poem4" name="poem5" value="A21" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>5.</p><input type="text" id="p5poem5" name="poem5" value="A22" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>6.</p><input type="text" id="p5poem6" name="poem5" value="A23" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td><p>7.</p><input type="text" id="p5poem7" name="poem5" value="A31" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>8.</p><input type="text" id="p5poem8" name="poem5" value="A32" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>9.</p><input type="text" id="p5poem9" name="poem5" value="A33" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-
-                    <tr>
-                        <td><p>10.</p><input type="text" id="p5poem10" name="poem5" value="B11" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>11.</p><input type="text" id="p5poem11" name="poem5" value="B12" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>12.</p><input type="text" id="p5poem12" name="poem5" value="B13" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td><p>13.</p><input type="text" id="p5poem13" name="poem5" value="B21" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>14.</p><input type="text" id="p5poem14" name="poem5" value="B22" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>15.</p><input type="text" id="p5poem15" name="poem5" value="B23" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-                    <tr>
-                        <td><p>16.</p><input type="text" id="p5poem16" name="poem5" value="B31" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>17.</p><input type="text" id="p5poem17" name="poem5" value="B32" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                        <td><p>18.</p><input type="text" id="p5poem18" name="poem5" value="B33" onchange="newSelection()" required minlength="3" maxlength="3" size="6"></td>
-                    </tr>
-                </table>
-
+                <!-- Center Panel: Generated Text -->
+            <div class="rightPanel">
+                <p id="generatedPoem">Selecciona una opción para generar un poema.</p>
             </div>
         </div>
-    </div>
-
-
-    <script src="app.js"></script>
-  </body>
+        <script src="app.js"></script>
+    </body>
 </html>
