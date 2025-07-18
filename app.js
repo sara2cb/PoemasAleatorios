@@ -1,198 +1,276 @@
 var poemaOrig 
 var noColumns
-var noRows
+var noRowsPerParagraph
+var noParagraph
+
+var body 
+var order
 
 function initDemo() {
-    poemaOrig = [[  ["toda roca", "muere", "nace"], 
-                ["roca", "lo que somos", "lo que resistimos"],
-                ["piedra", "del muro", "y de la piedra"]],
+    poemaOrig = [
+            [  
+                ["toda roca ", "nace de lo que es "], 
+                ["muere ", "nace la piedra ", , , ],
+                [ "nace ", "y muere de lo que es " ]
+            ],
 
-            [   ["nace de lo que es", "nace la piedra", "y muere de lo que es"],
-                ["piedra", "sobre nuestra piel", "bajo ella"],
-                ["dijo el pedrero piedra", "miró la maldición de la labor", "y continuó el trabajo"]]]
-
-    document.getElementById("tableColRow").style.display = "none"
-    document.getElementById("orderP1P2").style.display = "none"
-    document.getElementById("orderP3").style.display = "none"
-    document.getElementById("orderP4").style.display = "none"
-    document.getElementById("orderP5").style.display = "none"
-
-}
-
-var randomNow = false
-function randomize(){
-    randomNow = true
-    newSelection()
-}
-
-function columnChange(){
-    noColumns = parseFloat(document.getElementById("columnVal").value)
-    noRows = Math.ceil((poemaOrig.length * poemaOrig[0].length) / noColumns)
-    document.getElementById("rowVal").value = noRows
-    newSelection()
-}
-
-function rowChange(){
-    noRows = parseFloat(document.getElementById("rowVal").value)
-    noColumns = Math.ceil((poemaOrig.length * poemaOrig[0].length) / noRows)
-    document.getElementById("columnVal").value = noColumns
-    newSelection()
-}
-
-function newSelection(){
-    document.getElementById("left").innerHTML = "";
-    var modecur = parseFloat(document.getElementById("mode").value)
-    if(modecur==1){
-
-        document.getElementById("tableColRow").style.display = "inline"
-        document.getElementById("tableColRow").style.visibility = "visible"
-        document.getElementById("orderP1P2").style.display = "inline"
-        document.getElementById("orderP1P2").style.visibility = "visible"
-        document.getElementById("orderP3").style.display = "none"
-        document.getElementById("orderP4").style.display = "none"
-        document.getElementById("orderP5").style.display = "none"
-
-        //random order primero y segundo
-        order = []
-        elementList = 1
-        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-            for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                var elemList = document.getElementById("p1poem"+elementList).value
-                elementList++
-                order.push([elemList.charCodeAt(0) - 65, elemList.charCodeAt(1) - 49])
-            }
-        }
-        
-        if(randomNow){
-
-            order = []
-            for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-                for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                    order.push([AorB, rowP])
-                }
-            }
-
-            order = shuffle(order)
+            [   
+                ["roca ", "piedra " ],
+                ["lo que somos ", "sobre nuestra piel "],
+                ["lo que resistimos ", "bajo ella " , "y continuó el trabajo "]
+            ],
             
-            randomNow = false
+            [   
+                ["piedra ", "dijo el pedrero piedra " ],
+                ["del muro ", "miró la maldición de la labor " ],
+                [ "y de la piedra " , "y continuó el trabajo "]
+            ]
+            ]
 
-            elementList = 1
-            for (var i = 0; i < order.length; i++) {
-                letter =  String.fromCharCode(order[i][0] + 65)
-                number =  String.fromCharCode(order[i][1] + 49)
-                document.getElementById("p1poem"+elementList).value = letter.concat(number)
-                elementList++
+    body = document.getElementById("generatedPoem");
+
+    elemI = 1
+    reorder()
+}
+
+function randomize(){
+    for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+    }
+    newSelection()
+}
+
+function reorder(){
+    order = []
+    for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+        for (var poemNo = 0; poemNo < poemaOrig[AorB].length; poemNo++) {
+            for(var verNo = 0; verNo < 2; verNo++){
+                order.push([AorB, poemNo, verNo])
             }
         }
+    }
+    newSelection()
+}
 
+function addHoverListeners() {
+  // Select all generated verses
+  const verses = document.querySelectorAll('.generatedVerse');
 
-        
-        noColumns = parseFloat(document.getElementById("columnVal").value);
-        noRows = parseFloat(document.getElementById("rowVal").value);
-        noVerses = poemaOrig[0][0].length
-        primera(order)
+  verses.forEach(verse => {
+    verse.addEventListener('mouseenter', () => {
+        verse.classList.add('highlighted')
+        const id = verse.dataset.verse;
+        const originalLine = document.getElementById(id);
+        if (originalLine) originalLine.classList.add('highlighted');
+    });
 
-    }else if(modecur==2){
+    verse.addEventListener('mouseleave', () => {
+        verse.classList.remove('highlighted')
+        const id = verse.dataset.verse;
+        const originalLine = document.getElementById(id);
+        if (originalLine) originalLine.classList.remove('highlighted');
+    });
+  });
+}
 
-        document.getElementById("tableColRow").style.display = "none"
-        document.getElementById("orderP1P2").style.display = "inline"
-        document.getElementById("orderP1P2").style.visibility = "visible"
-        document.getElementById("orderP3").style.display = "none"
-        document.getElementById("orderP4").style.display = "none"
-        document.getElementById("orderP5").style.display = "none"
-
-        //random order primero y segundo
-        order = []
-        elementList = 1
-        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-            for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                var elemList = document.getElementById("p1poem"+elementList).value
-                elementList++
-                order.push([elemList.charCodeAt(0) - 65, elemList.charCodeAt(1) - 49])
-            }
+function GenerateOriginal()
+{
+    //random order tercero
+    order = [] 
+    for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+        order.push([])
+        for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+            AorBPlus = AorB+1
+            rowPPlus = rowP+1
+            var elemList = parseFloat(document.getElementById("p3poem"+ AorBPlus + rowPPlus).value)-1
+            order[AorB].push(elemList)
         }
-        
-        if(randomNow){
-            order = []
-            for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-                for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                    order.push([AorB, rowP])
-                }
-            }
-
-            order = shuffle(order)
-            randomNow = false
-
-            elementList = 1
-            for (var i = 0; i < order.length; i++) {
-                letter =  String.fromCharCode(order[i][0] + 65)
-                number =  String.fromCharCode(order[i][1] + 49)
-                document.getElementById("p1poem"+elementList).value = letter.concat(number)
-                elementList++
-            }
-        }
-
-        noVerses = poemaOrig[0][0].length
-        segunda(order)
-
-    }else if(modecur==3){
-
-        document.getElementById("tableColRow").style.display = "none"
-        document.getElementById("orderP1P2").style.display = "none"
-        document.getElementById("orderP3").style.display = "inline"
-        document.getElementById("orderP3").style.visibility = "visible"
-        document.getElementById("orderP4").style.display = "none"
-        document.getElementById("orderP5").style.display = "none"
-
-        //random order tercero
+    }
+    
+    if(randomNow){
         order = [] 
         for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
             order.push([])
             for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                AorBPlus = AorB+1
-                rowPPlus = rowP+1
-                var elemList = parseFloat(document.getElementById("p3poem"+ AorBPlus + rowPPlus).value)-1
-                order[AorB].push(elemList)
+                order[AorB].push(rowP)
             }
         }
+
+        order[0] = shuffle(order[0])
+        order[1] = shuffle(order[1])
         
+        randomNow = false
+
+        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+            for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+                AorBPlus = AorB+1
+                rowPPlus = rowP+1
+                document.getElementById("p3poem"+ AorBPlus + rowPPlus).value = order[AorB][rowP]+1
+            }
+        }
+
+    }
+    noVerses = poemaOrig[0][0].length
+    noRows = poemaOrig[0].length
+    WriteOriginal(order)
+}
+
+function GenerateVerso(){
+    
+        document.getElementById("selectProsa").style.display = "none"
+        document.getElementById("selectOriginal").style.display = "none"
+        document.getElementById("orderCortina").style.display = "none"
+        document.getElementById("selectVerso").style.display = "inline"
+        document.getElementById("selectVerso").style.visibility = "visible"
+
+        //random order FormatVerso
+        noVerses = poemaOrig[0][0].length
+        order = [] 
+        elemI = 1
+        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+            for (var poemNo = 0; poemNo < poemaOrig[AorB].length; poemNo++) {
+                for(var verNo = 0; verNo < noVerses; verNo++){
+                    var elemList = document.getElementById("p5poem"+ elemI).value
+                    elemI++
+                    var AorBCur =  elemList.charCodeAt(0) - 65
+                    var poemCur = elemList.charCodeAt(1) - 49
+                    var verseCur = elemList.charCodeAt(2) - 49
+
+                    order.push([AorBCur, poemCur, verseCur])
+                }
+            }
+        }
+
+        noRows = order.length
+
         if(randomNow){
             order = [] 
             for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-                order.push([])
-                for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                    order[AorB].push(rowP)
+                for (var poemNo = 0; poemNo < poemaOrig[AorB].length; poemNo++) {
+                    for(var verNo = 0; verNo < noVerses; verNo++){
+                        order.push([AorB, poemNo, verNo])
+                    }
                 }
             }
 
-            order[0] = shuffle(order[0])
-            order[1] = shuffle(order[1])
-            
+            order = shuffle(order)
             randomNow = false
 
-            for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-                for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
-                    AorBPlus = AorB+1
-                    rowPPlus = rowP+1
-                    document.getElementById("p3poem"+ AorBPlus + rowPPlus).value = order[AorB][rowP]+1
-                }
+            for (var i = 0; i < order.length; i++) {
+                letter = String.fromCharCode(order[i][0] + 65)
+                number = String.fromCharCode(order[i][1] + 49)
+                verse = String.fromCharCode(order[i][2] + 49)
+
+                var iPlus = i+1
+
+                document.getElementById("p5poem"+ iPlus).value = letter.concat(number, verse)
+                    
             }
-
         }
-        noVerses = poemaOrig[0][0].length
-        noRows = poemaOrig[0].length
-        tercera(order)
+        
+        WriteVerso(order)
+}
 
-    }else if(modecur==4){
+function GenerateEstrofa(){
+    document.getElementById("selectProsa").style.display = "inline"
+    document.getElementById("selectProsa").style.visibility = "visible"
+    document.getElementById("selectOriginal").style.display = "none"
+    document.getElementById("orderCortina").style.display = "none"
+    document.getElementById("selectVerso").style.display = "none"
 
-        document.getElementById("tableColRow").style.display = "none"
-        document.getElementById("orderP1P2").style.display = "none"
-        document.getElementById("orderP3").style.display = "none"
-        document.getElementById("orderP4").style.display = "inline"
-        document.getElementById("orderP4").style.visibility = "visible"
-        document.getElementById("orderP5").style.display = "none"
+    //random order primero y segundo
+    order = []
+    elementList = 1
+    for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+        for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+            var elemList = document.getElementById("p1poem"+elementList).value
+            elementList++
+            order.push([elemList.charCodeAt(0) - 65, elemList.charCodeAt(1) - 49])
+        }
+    }
+    
+    if(randomNow){
 
-        //random order cuarta
+        order = []
+        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+            for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+                order.push([AorB, rowP])
+            }
+        }
+
+        order = shuffle(order)
+        
+        randomNow = false
+
+        elementList = 1
+        for (var i = 0; i < order.length; i++) {
+            letter =  String.fromCharCode(order[i][0] + 65)
+            number =  String.fromCharCode(order[i][1] + 49)
+            document.getElementById("p1poem"+elementList).value = letter.concat(number)
+            elementList++
+        }
+    }
+
+
+    
+    noColumns = 1;
+    noRows = poemaOrig[0].length + poemaOrig[1].length;
+    noVerses = poemaOrig[0][0].length
+    WriteEstrofa(order)
+}
+
+function GenerateProsa(){
+    document.getElementById("selectProsa").style.display = "inline"
+    document.getElementById("selectProsa").style.visibility = "visible"
+    document.getElementById("selectOriginal").style.display = "none"
+    document.getElementById("orderCortina").style.display = "none"
+    document.getElementById("selectVerso").style.display = "none"
+
+    //random order primero y segundo
+    order = []
+    elementList = 1
+    for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+        for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+            var elemList = document.getElementById("p1poem"+elementList).value
+            elementList++
+            order.push([elemList.charCodeAt(0) - 65, elemList.charCodeAt(1) - 49])
+        }
+    }
+    
+    if(randomNow){
+        order = []
+        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
+            for (var rowP = 0; rowP < poemaOrig[AorB].length; rowP++) {
+                order.push([AorB, rowP])
+            }
+        }
+
+        order = shuffle(order)
+        randomNow = false
+
+        elementList = 1
+        for (var i = 0; i < order.length; i++) {
+            letter =  String.fromCharCode(order[i][0] + 65)
+            number =  String.fromCharCode(order[i][1] + 49)
+            document.getElementById("p1poem"+elementList).value = letter.concat(number)
+            elementList++
+        }
+    }
+
+    noVerses = poemaOrig[0][0].length
+    WriteProsa(order)
+}
+
+function Cortina(){
+    
+        document.getElementById("selectProsa").style.display = "none"
+        document.getElementById("selectOriginal").style.display = "none"
+        document.getElementById("orderCortina").style.display = "inline"
+        document.getElementById("orderCortina").style.visibility = "visible"
+        document.getElementById("selectVerso").style.display = "none"
+
+        //random order FormatCortina
         noVerses = poemaOrig[0][0].length
         noRows = poemaOrig[0].length
 
@@ -239,155 +317,136 @@ function newSelection(){
             }
         }
         
-        cuarta(order)
-
-    }else if(modecur==5){
-
-        document.getElementById("tableColRow").style.display = "none"
-        document.getElementById("orderP1P2").style.display = "none"
-        document.getElementById("orderP3").style.display = "none"
-        document.getElementById("orderP4").style.display = "none"
-        document.getElementById("orderP5").style.display = "inline"
-        document.getElementById("orderP5").style.visibility = "visible"
-
-        //random order quinta
-        noVerses = poemaOrig[0][0].length
-        order = [] 
-        elemI = 1
-        for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-            for (var poemNo = 0; poemNo < poemaOrig[AorB].length; poemNo++) {
-                for(var verNo = 0; verNo < noVerses; verNo++){
-                    var elemList = document.getElementById("p5poem"+ elemI).value
-                    elemI++
-                    var AorBCur =  elemList.charCodeAt(0) - 65
-                    var poemCur = elemList.charCodeAt(1) - 49
-                    var verseCur = elemList.charCodeAt(2) - 49
-
-                    order.push([AorBCur, poemCur, verseCur])
-                }
-            }
-        }
-
-        noRows = order.length
-
-        if(randomNow){
-            order = [] 
-            for (var AorB = 0; AorB < poemaOrig.length; AorB++) {
-                for (var poemNo = 0; poemNo < poemaOrig[AorB].length; poemNo++) {
-                    for(var verNo = 0; verNo < noVerses; verNo++){
-                        order.push([AorB, poemNo, verNo])
-                    }
-                }
-            }
-
-            order = shuffle(order)
-            randomNow = false
-
-            for (var i = 0; i < order.length; i++) {
-                letter = String.fromCharCode(order[i][0] + 65)
-                number = String.fromCharCode(order[i][1] + 49)
-                verse = String.fromCharCode(order[i][2] + 49)
-
-                var iPlus = i+1
-
-                document.getElementById("p5poem"+ iPlus).value = letter.concat(number, verse)
-                    
-            }
-        }
-        
-        quinta(order)
-    }
+        FormatCortina(order)
 }
 
-//PRIMERA----------------------------------------------------------------------------------------------------------------------------------
-function primera(order){
-
-    //Rearrange poem
+function newSelection(){
+    body.innerHTML = "";
+    var modecur = parseFloat(document.getElementById("mode").value)
     
-    poema = []
-    curI = 0
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        poema.push([])
-        for (var verseNo = 0; verseNo < noVerses; verseNo++) {
-            poema[rowP].push([])
-            curI = rowP%noRows
-            for (var columnP = 0; columnP < noColumns; columnP++) {
-                if(curI >=  order.length){
-                    poema[rowP][verseNo].push(" ")
-                }else{
-                    poema[rowP][verseNo].push(poemaOrig[order[curI][0]][order[curI][1]][verseNo])
-                }
-                
-                curI += noRows
-            }
-        }
+    if(modecur==1){
+        noParagraph =  1 
+        noColumns = 1
+        noRowsPerParagraph = 6*3
+        WriteVerso(order)
     }
+    else if(modecur==2){
+        noParagraph =  3 
+        noColumns = 2
+        noRowsPerParagraph = 3
+        WriteEstrofa(order)
+    }
+    else if(modecur==3){
+        noParagraph =  1 
+        noColumns = 1
+        noRowsPerParagraph = 6*3
+        WriteProsa(order)
+    }
+    else if(modecur==4){
+        noParagraph =  3 
+        noColumns = 1
+        noRowsPerParagraph = 3
+        WriteOriginal(order)
+    }
+    addHoverListeners();
+}
 
+function createCell(text, verseID){
 
-    // get the reference for the body
-    var body = document.getElementById("left")
+    // Create cell content with a span holding a data attribute for matching
+    var verseId ='verse-' +  verseID; // or however you get the unique ID, e.g., "A11"
+    var cell = document.createElement("td")
 
-    // creates a <table> element and a <tbody> element
+    var span = document.createElement("span")
+    span.classList.add("generatedVerse")
+    span.dataset.verse = verseId
+    span.textContent = text
+    cell.style.textAlign = "center";
+    cell.style.verticalAlign = "middle";
+
+    cell.appendChild(span)
+    return cell
+}
+
+//WriteEstrofa----------------------------------------------------------------------------------------------------------------------------------
+function WriteEstrofa(order){
+
     var tbl = document.createElement("table")
     var tblBody = document.createElement("tbody")
-
     // creating all cells
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        for (var verseNo = 0; verseNo < poema[rowP].length; verseNo++) {
-            // creates a table row
-            var row = document.createElement("tr")
-            var emptyRow
-            if(verseNo == poema[rowP].length-1){
-                emptyRow = document.createElement("tr")
+    var counter = 0
+    for (var paragraph = 0; paragraph < noParagraph; paragraph++) {
+        for (var rowP = 0; rowP < noRowsPerParagraph; rowP++) {
+            var row = document.createElement("tr");
+
+            for (var col = 0; col < noColumns; col++) {
+                if (counter >= order.length) break; // avoid out-of-bounds
+
+                var verseId = 'verse-' + order[counter][0] + order[counter][1] + order[counter][2];
+
+                var cell = document.createElement("td");
+                cell.style.verticalAlign = "middle";
+                cell.style.textAlign = "center";
+                cell.style.padding = "10px 100px"; // space between the two columns
+
+                var span = document.createElement("span");
+                span.classList.add("generatedVerse");
+                span.dataset.verse = verseId;
+                span.textContent = poemaOrig[order[counter][0]][order[counter][1]][order[counter][2]];
+
+                cell.appendChild(span);
+                row.appendChild(cell);
+
+                counter++;
             }
 
-            for (var columnP = 0; columnP < poema[rowP][verseNo].length; columnP++) {
-                // Create a <td> element and a text node, make the text
-                // node the contents of the <td>, and put the <td> at
-                // the end of the table row
-                var cell = document.createElement("td")
-                var cellText = document.createTextNode(poema[rowP][verseNo][columnP])
-                cell.appendChild(cellText)
-                row.appendChild(cell)
-                if(verseNo == poema[rowP].length-1 && poema[rowP][verseNo][columnP] != " "){
-                    var cell = document.createElement("td")
-                    var cellText = document.createTextNode("____")
-                    cell.appendChild(cellText)
-                    emptyRow.appendChild(cell)
-                }
-            }
-            // add the row to the end of the table body
-            tblBody.appendChild(row)
-            if(verseNo == poema[rowP].length-1 && rowP != poema.length-1 && poema[rowP][verseNo][columnP] != " "){
-                tblBody.appendChild(emptyRow)
-            }
+            tblBody.appendChild(row);
         }
+
+        // Separator row
+        var emptyRow = document.createElement("tr");
+        var separatorCell = document.createElement("td");
+
+        separatorCell.colSpan = 2;
+        separatorCell.textContent = "____";
+        separatorCell.style.textAlign = "center";
+        separatorCell.style.padding = "10px 0";
+
+        emptyRow.appendChild(separatorCell);
+        tblBody.appendChild(emptyRow);
+
     }
-    
+
     // put the <tbody> in the <table>
     tbl.appendChild(tblBody)
     // appends <table> into <body>
     body.appendChild(tbl)
 }
 
-//SEGUNDA----------------------------------------------------------------------------------------------------------------------------------
-function segunda(order){
-    //Rearrange poem
-    poema = ""
-    
-    for (var elemPoem = 0; elemPoem < order.length; elemPoem++) {
-        for (var verseNo = 0; verseNo < noVerses; verseNo++) {
-            poema = poema.concat(poemaOrig[order[elemPoem][0]][order[elemPoem][1]][verseNo], " ")
+//WriteProsa----------------------------------------------------------------------------------------------------------------------------------
+function WriteProsa(order){
+    var paragraph = document.createElement("p"); // create paragraph instead of table
+    paragraph.style.textAlign = "justify"; // optional: justify the paragraph
+    paragraph.style.padding = "20px"; // optional: spacing
+    paragraph.style.color = "white"; // optional: visible on black background
+
+    var counter = 0;
+    for (var paragraphIndex = 0; paragraphIndex < noParagraph; paragraphIndex++) {
+        for (var rowP = 0; rowP < noRowsPerParagraph; rowP++) {
+            var verseId = 'verse-' + order[counter][0] + order[counter][1] + order[counter][2];
+
+            var span = document.createElement("span");
+            span.classList.add("generatedVerse");
+            span.dataset.verse = verseId;
+            span.textContent = poemaOrig[order[counter][0]][order[counter][1]][order[counter][2]] + " ";
+
+            paragraph.appendChild(span);
+            counter++;
+        
         }
     }
 
-    // get the reference for the body
-    var body = document.getElementById("left")
-    var paragraph = document.createElement("p");
-    var text = document.createTextNode(poema);
-
-    paragraph.appendChild(text);
-    body.appendChild(paragraph)
+    body.appendChild(paragraph);
 }
 
 function translate(order){
@@ -411,56 +470,60 @@ function translateReverse(order){
     return newOrd
 }
 
-//TERCERA----------------------------------------------------------------------------------------------------------------------------------
-function tercera(order){
-    //Rearrange poem
-    poema = []
-    
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        poema.push([])
-        for (var verseNo = 0; verseNo < noVerses; verseNo++) {
-            poema[rowP].push([])
-            partA = poemaOrig[0][order[0][rowP]][verseNo]
-            partB = poemaOrig[1][order[1][rowP]][verseNo]
-            poema[rowP][verseNo].push(partA.concat(" ", partB))
-        }
-    }
+//FormatEstrofa----------------------------------------------------------------------------------------------------------------------------------
+function WriteOriginal(order){
 
 
-    // get the reference for the body
-    var body = document.getElementById("left")
-
-    // creates a <table> element and a <tbody> element
     var tbl = document.createElement("table")
     var tblBody = document.createElement("tbody")
-
     // creating all cells
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        for (var verseNo = 0; verseNo < poema[rowP].length; verseNo++) {
-            // creates a table row
+    var counter = 0
+    for (var paragraph = 0; paragraph < noParagraph; paragraph++) {
+        for (var rowP = 0; rowP < noRowsPerParagraph; rowP++) {
+            
             var row = document.createElement("tr")
+            for (var partVerse = 0; partVerse < 2; partVerse++) {
+                var verseId ='verse-' +  order[counter ][0]+  order[counter][1] +  order[counter ][2]; // or however you get the unique ID, e.g., "A11"
 
-            // Create a <td> element and a text node, make the text
-            // node the contents of the <td>, and put the <td> at
-            // the end of the table row
-            var cell = document.createElement("td")
-            var cellText = document.createTextNode(poema[rowP][verseNo])
-            cell.appendChild(cellText)
-            row.appendChild(cell)
+                // creates a table row
+                var cell = document.createElement("td")
+
+                var span = document.createElement("span")
+                span.classList.add("generatedVerse")
+                span.dataset.verse = verseId
+                span.textContent = poemaOrig[order[counter ][0]][order[counter][1]][order[counter ][2]]
+                if(counter%2 == 0) {
+                    cell.style.verticalAlign = "right";
+                    cell.style.textAlign = "right";
+                }
+                else{
+                    cell.style.verticalAlign = "left";
+                    cell.style.textAlign = "left";
+                }
+                cell.appendChild(span)
+
+                row.appendChild(cell); // append each partVerse's <td> into the same row
+                counter++
+            }
 
             // add the row to the end of the table body
             tblBody.appendChild(row)
-            if(verseNo == poema[rowP].length-1 && rowP != poema.length-1){
-                var emptyRow = document.createElement("tr")
-                var cell = document.createElement("td")
-                var cellText = document.createTextNode("____")
-                cell.appendChild(cellText)
-                emptyRow.appendChild(cell)
-                tblBody.appendChild(emptyRow)
-            }
         }
+        var emptyRow = document.createElement("tr");
+
+        // Create a <td> that spans across 3 columns (or 2 if you only use two columns)
+        var separatorCell = document.createElement("td");
+        separatorCell.colSpan = 3; // Ensure this matches your main poem row's number of cells
+        separatorCell.textContent = "____";
+        separatorCell.style.textAlign = "center"; // Center the text horizontally
+        separatorCell.style.padding = "10px 0";   // Optional spacing
+
+        // Append the cell to the row, and the row to the table
+        emptyRow.appendChild(separatorCell);
+        tblBody.appendChild(emptyRow);
+
     }
-    
+
     // put the <tbody> in the <table>
     tbl.appendChild(tblBody)
     // appends <table> into <body>
@@ -479,8 +542,8 @@ function translateReverseTer(order){
     return newOrd
 }
 
-//CUARTA----------------------------------------------------------------------------------------------------------------------------------
-function cuarta(order){
+//FormatCortina----------------------------------------------------------------------------------------------------------------------------------
+function FormatCortina(order){
     //Rearrange poem
     poema = []
     
@@ -494,10 +557,6 @@ function cuarta(order){
         }
     }
 
-
-    // get the reference for the body
-    var body = document.getElementById("left")
-
     // creates a <table> element and a <tbody> element
     var tbl = document.createElement("table")
     var tblBody = document.createElement("tbody")
@@ -507,23 +566,13 @@ function cuarta(order){
         for (var verseNo = 0; verseNo < poema[rowP].length; verseNo++) {
             // creates a table row
             var row = document.createElement("tr")
-
-            // Create a <td> element and a text node, make the text
-            // node the contents of the <td>, and put the <td> at
-            // the end of the table row
-            var cell = document.createElement("td")
-            var cellText = document.createTextNode(poema[rowP][verseNo])
-            cell.appendChild(cellText)
-            row.appendChild(cell)
+            row.appendChild(createCell(poema[rowP][verseNo], order[rowP][verseNo]))
 
             // add the row to the end of the table body
             tblBody.appendChild(row)
             if(verseNo == poema[rowP].length-1 && rowP != poema.length-1){
                 var emptyRow = document.createElement("tr")
-                var cell = document.createElement("td")
-                var cellText = document.createTextNode("____")
-                cell.appendChild(cellText)
-                emptyRow.appendChild(cell)
+                emptyRow.appendChild(createCell("____", null))
                 tblBody.appendChild(emptyRow)
             }
         }
@@ -549,43 +598,47 @@ function translateReverseCuar(order){
     return newOrd
 }
 
-//QUINTA----------------------------------------------------------------------------------------------------------------------------------
-function quinta(order){
+//FormatVerso----------------------------------------------------------------------------------------------------------------------------------
+function WriteVerso(order){
     //Rearrange poem
-    poema = []
-    
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        poema.push(poemaOrig[order[rowP][0]][order[rowP][1]][order[rowP][2]])
-    }
-
-    // get the reference for the body
-    var body = document.getElementById("left")
 
     // creates a <table> element and a <tbody> element
     var tbl = document.createElement("table")
     var tblBody = document.createElement("tbody")
 
+    var counter = 0
     // creating all cells
-    for (var rowP = 0; rowP < noRows; rowP++) {
-        // creates a table row
-        var row = document.createElement("tr")
+    for (var paragraph = 0; paragraph < noParagraph; paragraph++) {
+        for (var rowP = 0; rowP < noRowsPerParagraph; rowP++) {
+            var verseId ='verse-' +  order[counter][0] +  order[counter][1] +  order[counter][2]; // or however you get the unique ID, e.g., "A11"
 
-        // Create a <td> element and a text node, make the text
-        // node the contents of the <td>, and put the <td> at
-        // the end of the table row
-        var cell = document.createElement("td")
-        var cellText = document.createTextNode(poema[rowP])
-        cell.appendChild(cellText)
-        row.appendChild(cell)
+            // creates a table row
+            var row = document.createElement("tr")
+            
+            // Create cell content with a span holding a data attribute for matching
+            var cell = document.createElement("td")
 
-        // add the row to the end of the table body
-        tblBody.appendChild(row)
+            var span = document.createElement("span")
+            span.classList.add("generatedVerse")
+            span.dataset.verse = verseId
+            span.textContent =  poemaOrig[order[counter ][0]][order[counter][1]][order[counter ][2]]
+            cell.style.textAlign = "center";
+            cell.style.verticalAlign = "middle";
+
+            cell.appendChild(span)
+
+            row.appendChild( cell )
+            tblBody.appendChild(row)
+            counter++
+        }
     }
     
     // put the <tbody> in the <table>
     tbl.appendChild(tblBody)
     // appends <table> into <body>
     body.appendChild(tbl)
+
+    
 }
 
 function translateReverseQuin(order){
