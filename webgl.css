@@ -1,211 +1,75 @@
-body { 
-	margin: 0; 
-	background-color:#000;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+  color: white;
+  font-family: sans-serif;
 }
 
-
-div#fps {
-	font-family: 'Courier New', Courier, monospace;
-	font-size: 10px;
-	position: absolute;
-	top: 5px;
-	left: 5px;
-	color: white;
-  }
-
-canvas { width: 100%; height: 100% }
-.btn-group .button {
-	background-color: #0063b4; /* Green */
-	border: 1px solid rgb(13, 83, 139);
-	color: white;
-    margin-top:10px;
-	padding: 15px 32px;
-	text-align: center;
-	text-decoration: none;
-	font-size: 24;
-	cursor: pointer;
-	width: 150px;
-	display: block;
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-.btn-group .button:not(:last-child) {
-	border-bottom: none; /* Prevent double borders */
+.leftPanel {
+  flex: 1 1 0;
+  background-color: black;
+  color: white;
+  padding: 1em;
+  box-sizing: border-box;
+  overflow-y: auto; /* scroll vertically if needed */
+  display: flex;
+  flex-direction: column;
 }
 
-.btn-group .button:hover {
-	background-color: rgb(13, 83, 139);
+.leftPanel button,
+.leftPanel select,
+.leftPanel input {
+  margin-top: 0.5em;
+  background: #222;
+  color: white;
+  border: 1px solid #555;
+  padding: 0.4em;
+  font-size: 1em;
+  box-sizing: border-box;
 }
 
-p{
-	color: white;
-	font-family: Arial, Helvetica, sans-serif;
+.originalPoem {
+  margin-top: 2em;
+  font-style: normal;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: #ccc;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
-.splitLeft {
-	width: 60%;
-	position: fixed;
-	z-index: -1;
-	top: 0;
-	overflow-x: hidden;
-	-ms-transform: translateY(13.5%);
-  	transform: translateY(13.5%);
-    padding-left: 20px;
-    padding-right: 20px;
+.rightPanel {
+  flex: 2 1 0;
+  background-color: black;
+  color: white;
+  padding: 2em;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: justify;
+  overflow-y: auto;
 }
 
-.splitRight {
-	height: 100%;
-	width: 30%;
-	position: fixed;
-	z-index: 1;
-	top: 0;
-	overflow-x: hidden;
-	padding-top: 20px;
+.rightPanel p#generatedPoem {
+  max-width: 700px;
 }
 
-.splitLeftHalf {
-	width: 50%;
-	position: fixed;
-	z-index: -1;
-	top: 0;
-	overflow-x: hidden;
+.italic {
+  font-style: italic;
 }
-
-.splitRighHalft {
-	width: 50%;
-	position: fixed;
-	z-index: 1;
-	top: 0;
-	overflow-x: hidden;
-}
-
-/* Clear floats after the columns */
-.row:after {
-	content: "";
-	display: table;
-	clear: both;
-  }
-
-
-.left {
-	left: 0;
-	background-color: rgb(0, 0, 0);
-	z-index: -1;
-}
-
-
-.right {
-	right: 0;
-	background-color: #000;
-	z-index: 1;
-}
-
-.centered {
-	position: absolute;
-	top: 0%;
-	left: 50%;
-	transform: translate(-50%, -0%);
-	text-align: center;
-	z-index: 0;
-}
-
-.centered img {
-	width: 150px;
-	border-radius: 50%;
-}
-
-.switch {
-	position: relative;
-	display: inline-block;
-	width: 60px;
-	height: 34px;
-}
-
-.switch input { 
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.slider {
-	position: absolute;
-	cursor: pointer;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #ccc;
-	-webkit-transition: .4s;
-	transition: .4s;
-}
-
-.slider:before {
-	position: absolute;
-	content: "";
-	height: 26px;
-	width: 26px;
-	left: 4px;
-	bottom: 4px;
-	background-color: white;
-	-webkit-transition: .4s;
-	transition: .4s;
-}
-
-input:checked + .slider {
-	background-color: #2196F3;
-}
-
-input:focus + .slider {
-	box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-	-webkit-transform: translateX(26px);
-	-ms-transform: translateX(26px);
-	transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-	border-radius: 34px;
-}
-
-.slider.round:before {
-	border-radius: 50%;
-}
-
-input[type=number], select {
-	width: 100%;
-	/*padding: 12px 20px;
-	margin: 8px 0;*/
-	display: inline-block;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-sizing: border-box;
-}
-
-input[type=file] {
-
-	display: none;
-}
-
-.input:not(:last-child) {
-	border-bottom: none; /* Prevent double borders */
-} 
-
-.input:hover {
-	background-color: rgb(13, 83, 139);
-}
-
-table, td, th {  
-	text-align: left;
-}
-
-table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-th, td {
-	color: aliceblue;
+.highlighted {
+  background-color: yellow;
+  color: black;
+  transition: background-color 0.3s ease;
 }
