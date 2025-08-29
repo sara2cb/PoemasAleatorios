@@ -1,48 +1,184 @@
 <!DOCTYPE html>
 <html style="overflow: hidden">
-    <head>
-        <meta charset="utf-8"/>
-        <title>Poemas</title>
-        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <link rel="stylesheet" type="text/css" href="webgl.css">
-    </head>
-    <body onload="initDemo()">
-        <div class="container">
-            <!-- Left Panel: Selector and Options -->
-            <div class="leftPanel">
-                <button onclick="randomize()">Aleatorizar</button>
-                <button onclick="reorder()">Reordenar</button>
-                <label for="mode">Propuesta:</label>
-                <select id="mode" onchange="newSelection()">
-                    <option disabled selected value> -- Escoge -- </option>
-                    <option value="1">Verso</option>
-                    <option value="2">Estrofa</option>
-                    <option value="3">Prosa</option>
-                    <option value="4">Cortina</option>
-                </select>
+  <head>
+    <meta charset="utf-8" />
+    <title>Poemas</title>
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link rel="stylesheet" type="text/css" href="webgl.css" />
+    <style>
+      .controls { display: grid; gap: 8px; margin-bottom: 12px; }
+      .controls > * { max-width: 320px; }
+      .originalPoem span.originalVerse { white-space: pre-wrap; }
+      .italic { font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Left Panel: Selector and Options -->
+      <div class="leftPanel">
+        <div class="controls">
+          <button onclick="randomize()">Aleatorizar</button>
+          <button onclick="reorder()">Reordenar</button>
 
+          <label for="mode">Propuesta:</label>
+          <select id="mode" onchange="newSelection()">
+            <option disabled selected value> -- Escoge -- </option>
+            <option value="1">Verso</option>
+            <option value="2">Estrofa</option>
+            <option value="3">Prosa</option>
+            <option value="4">Cortina</option>
+          </select>
 
-                <!-- Right Panel: Original Poem -->
-                <div class="originalPoem">
-                    <span id="verse-000" class="originalVerse italic">toda roca</span>        <span id="verse-001" class="originalVerse"> nace de lo que es</span><br />
-                    <span id="verse-010" class="originalVerse italic">muere</span>            <span id="verse-011" class="originalVerse"> nace la piedra</span><br />
-                    <span id="verse-020" class="originalVerse italic">nace</span>             <span id="verse-021" class="originalVerse"> y muere de lo que es</span><br /><br />
+          <!-- New: load local .txt without CORS -->
+          <label for="poemFile">Cargar archivo (.txt)</label>
+          <input id="poemFile" type="file" accept=".txt" />
 
-                    <span id="verse-100" class="originalVerse italic">roca</span>             <span id="verse-101" class="originalVerse"> piedra</span><br />
-                    <span id="verse-110" class="originalVerse italic">lo que somos </span>    <span id="verse-111" class="originalVerse"> sobre nuestra piel</span><br />
-                    <span id="verse-120" class="originalVerse italic">lo que resistimos</span><span id="verse-121" class="originalVerse"> bajo ella</span><br /><br />
+          <label for="poemNumber">Número de poema</label>
+          <input id="poemNumber" type="number" min="1" value="17" />
 
-                    <span id="verse-200" class="originalVerse italic">piedra </span>          <span id="verse-201" class="originalVerse" > dijo el pedrero piedra</span><br />
-                    <span id="verse-210" class="originalVerse italic">del muro</span>         <span id="verse-211" class="originalVerse" > miró la maldición de la labor</span><br />
-                    <span id="verse-220" class="originalVerse italic">y de la piedra</span>   <span id="verse-221" class="originalVerse" > y continuó el trabajo</span>
-                </div>
-            </div>
-
-                <!-- Center Panel: Generated Text -->
-            <div class="rightPanel">
-                <p id="generatedPoem">Selecciona una opción para generar un poema.</p>
-            </div>
+          <button id="loadPoemBtn">Cargar poema</button>
+          <small id="status" aria-live="polite"></small>
         </div>
-        <script src="app.js"></script>
-    </body>
+
+        <!-- Left Panel: Original Poem (filled dynamically) -->
+        <div id="originalPoem" class="originalPoem"></div>
+      </div>
+
+      <!-- Center/Right Panel: Generated Text -->
+      <div class="rightPanel">
+        <p id="generatedPoem">Selecciona una opción para generar un poema.</p>
+      </div>
+    </div>
+
+    <script>
+      // ---- Parsing & Rendering ----
+      function parsePoem(text, poemNumber) {
+        // Split poems by '#'
+        const poems = text
+          .split('#')
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0);
+
+        const poem = poems[poemNumber - 1];
+        if (!poem) throw new Error(`Poema ${poemNumber} no encontrado.`);
+
+        // Split into stanzas by blank lines
+        const rawStanzas = poem.split(/\n\s*\n/);
+
+        // Helpers to filter out metadata lines
+        const isMetadata = (line) => {
+          if (/^\d+\s*$/.test(line)) return true; // "29"
+          if (/^(\.\s*\.)+$/.test(line)) return true; // ". ."
+          if (/^\d+\.\s/.test(line)) return true; // "18. explícita"
+          return false;
+        };
+
+        const stanzas = rawStanzas
+            .map(s =>
+                s
+                .split('\n')
+                .map(l => l.trim())
+                .filter(l => l.length > 0 && !isMetadata(l))
+            )
+            .filter(arr => arr.length > 0);
+
+        // stanza: [0,1,2,3,4,5] -> [[0,3],[1,4],[2,5]]
+        const poemaOrig = stanzas.map(stanza => {
+            const half = Math.ceil(stanza.length / 2);
+            const left = stanza.slice(0, half);
+            const right = stanza.slice(half);
+            const rows = Math.max(left.length, right.length);
+
+            const grouped = [];
+            for (let i = 0; i < rows; i++) {
+                const l = (left[i] ?? '') + ' ';
+                const r = (right[i] ?? '') + ' ';
+                grouped.push([l, r]); // always two columns
+            }
+            return grouped;
+        });
+
+        return poemaOrig;
+      }
+
+      function renderPoem(poemaOrig) {
+        const container = document.getElementById('originalPoem');
+        container.innerHTML = '';
+
+        // Create spans like verse-rc0 (row/col) -> match your original pattern: verse-000, verse-001, ...
+        poemaOrig.forEach((stanza, r) => {
+          stanza.forEach((lineArr, c) => {
+            // There can be multiple strings per line-array, render them side-by-side
+            const [left = ''] = lineArr;
+            const right = lineArr[1] ?? '';
+
+            // Left (italic) + Right (normal)
+            const leftSpan = document.createElement('span');
+            leftSpan.id = `verse-${r}${c}0`.padEnd(9, '0'); // keep similar length
+            leftSpan.className = 'originalVerse italic';
+            leftSpan.textContent = left;
+
+            const rightSpan = document.createElement('span');
+            rightSpan.id = `verse-${r}${c}1`.padEnd(9, '1');
+            rightSpan.className = 'originalVerse';
+            rightSpan.textContent = right;
+
+            container.appendChild(leftSpan);
+            if (right) container.appendChild(rightSpan);
+
+            container.appendChild(document.createElement('br'));
+          });
+
+          // stanza separator
+          container.appendChild(document.createElement('br'));
+        });
+      }
+
+      // ---- File handling (no CORS needed) ----
+      function readSelectedFile() {
+        return new Promise((resolve, reject) => {
+          const fileInput = document.getElementById('poemFile');
+          if (!fileInput.files || !fileInput.files[0]) {
+            return reject(new Error('Selecciona un archivo .txt primero.'));
+          }
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+          reader.readAsText(fileInput.files[0], 'utf-8');
+        });
+      }
+
+      async function handleLoadPoem() {
+        const status = document.getElementById('status');
+        const num = parseInt(document.getElementById('poemNumber').value, 10) || 1;
+
+        status.textContent = 'Cargando…';
+        try {
+            const text = await readSelectedFile();
+            const poemaOrig = parsePoem(text, num+1);
+            renderPoem(poemaOrig);
+            status.textContent = `Poema ${num} cargado.`;
+            // make it global so app.js sees it
+            window.poemaOrig = poemaOrig;
+            reorder();
+        } catch (e) {
+            status.textContent = e.message;
+        }
+      }
+
+      // ---- Wire up controls ----
+      document.getElementById('loadPoemBtn').addEventListener('click', handleLoadPoem);
+
+      // If your app.js defines these, great. If not, keep no-ops to avoid errors.
+      window.randomize = window.randomize || function () {};
+      window.reorder   = window.reorder   || function () {};
+      window.newSelection = window.newSelection || function () {};
+    </script>
+
+    <!-- Keep your existing JS if needed (it won't be used for fetching the file anymore) -->
+    <script src="app.js"></script>
+  </body>
 </html>
