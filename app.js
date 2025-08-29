@@ -102,9 +102,9 @@ function addHoverListeners() {
         const countOfNew = [...document.querySelectorAll('.generatedVerse')]
             .filter(el => el.dataset.verse === origId).length;
 
-        if (countOfNew > 1) {
-            firstSelected.element.classList.add('copiedFrom'); // green if duplicated
-        }
+        //if (countOfNew > 1) {
+        //    firstSelected.element.classList.add('copiedFrom'); // green if duplicated
+        //}
 
         const countOfOld = [...document.querySelectorAll('.generatedVerse')]
             .filter(el => el.dataset.verse === previousId).length;
@@ -437,6 +437,4 @@ function WriteVerso(order){
     tbl.appendChild(tblBody)
     // appends <table> into <body>
     body.appendChild(tbl)
-
-    
 }
